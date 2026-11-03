@@ -1,0 +1,92 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: pulsedb
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pulsedb?TimeZone=Asia/Kolkata
+    username: pulsedb_user
+    password: pulsedb_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+    consumer:
+      group-id: pulsedb-consumers
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.pulsedb.model"
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 3000ms
+
+pulsedb:
+  debezium:
+    connector-name: pulsedb-connector
+    topic-prefix: pulsedb
+    database-host: localhost
+    database-port: 5432
+    database-name: pulsedb
+    database-user: pulsedb_user
+    database-password: pulsedb_pass
+    table-include-list: public.users,public.orders,public.products
+    offset-storage-file: C:/tmp/pulsedb-offsets.dat
+    slot-name: pulsedb_slot
+
+  kafka:
+    topics:
+      users: pulsedb.users
+      orders: pulsedb.orders
+      products: pulsedb.products
+      dead-letter: pulsedb.dead-letter
+
+  cache:
+    ttl: 300
+
+  webhook:
+    retry-attempts: 3
+    retry-backoff-ms: 2000
+    timeout-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.pulsedb: INFO
+    io.debezium: WARN
+    org.apache.kafka: WARN
