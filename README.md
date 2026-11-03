@@ -5,7 +5,7 @@ Real-time Change Data Capture pipeline that taps into the PostgreSQL Write-Ahead
 ## Stack
 
 - Java 21, Spring Boot 3.2.3, Maven
-- Debezium 2.5.0 (embedded engine — no Kafka Connect needed)
+- Debezium 2.5.0 (embedded engine)
 - Apache Kafka (Confluent 7.4.0)
 - Redis 7.2 (cache invalidation)
 - PostgreSQL 15 (with logical replication enabled)
